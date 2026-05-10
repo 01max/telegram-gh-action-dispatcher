@@ -114,9 +114,11 @@ cd telegram-gh-action-dispatcher
 # 2. Install dependencies
 cd worker && npm install
 
-# 3. Edit wrangler.toml — set your vars
-#    ALLOWED_CHAT_IDS: comma-separated, e.g. "7457792489"
-#    GITHUB_REPO: e.g. "your-github-handle/my-project"
+# 3. Configure wrangler.toml
+#    The repo ships with its own defaults in wrangler.toml.
+#    For a new project, copy the example and edit:
+cp wrangler.toml.example wrangler.toml
+#    Then set your ALLOWED_CHAT_IDS (comma-separated) and GITHUB_REPO (owner/repo)
 
 # 4. Set secrets
 npx wrangler secret put TELEGRAM_BOT_TOKEN
@@ -156,6 +158,13 @@ Admin endpoint for registering the webhook with Telegram. Expects a `X-Setup-Tok
 ## Environment reference
 
 ### Worker vars (in `wrangler.toml`)
+
+The repo ships with a `wrangler.toml.example` (template for new projects). 
+Consumer projects should copy the example and edit:
+
+```bash
+cp wrangler.toml.example wrangler.toml
+```
 
 | Var | Description |
 |-----|-------------|
