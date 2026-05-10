@@ -82,7 +82,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: your-github-handle/telegram-gh-action-dispatcher@v1
+      - uses: 01max/telegram-gh-action-dispatcher@v1
         with:
           command: ${{ github.event.client_payload.command }}
           chat_id: ${{ github.event.client_payload.chat_id }}
@@ -108,7 +108,7 @@ Each project that wants Telegram command handling needs its own Worker deploymen
 
 ```bash
 # 1. Clone this repo
-git clone https://github.com/your-github-handle/telegram-gh-action-dispatcher.git
+git clone https://github.com/01max/telegram-gh-action-dispatcher.git
 cd telegram-gh-action-dispatcher
 
 # 2. Install dependencies
