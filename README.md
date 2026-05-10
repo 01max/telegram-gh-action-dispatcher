@@ -8,7 +8,7 @@ A reusable GitHub Action + Cloudflare Worker that replaces cron-based Telegram b
 Telegram webhook ──▶ Cloudflare Worker ──▶ repository_dispatch ──▶ GitHub Action ──▶ bin/handle_command
 ```
 
-1. User sends `/disable` in Telegram
+1. User sends a `/` command in Telegram (`/disable` for example)
 2. Telegram sends a webhook POST to your Cloudflare Worker
 3. Worker validates the request, parses the command, and calls GitHub's `repository_dispatch` API
 4. A workflow in your project picks up the dispatch and runs this action
@@ -46,8 +46,7 @@ require 'json'
 # --- Your command handling logic ---
 
 case command
-when 'disable'
-  # e.g. call GitHub API to disable a workflow
+when 'disable' # e.g. call GitHub API to disable a workflow
   puts "Disabling workflow: #{args}"
 when 'enable'
   puts "Enabling workflow: #{args}"
@@ -83,7 +82,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: 01max/telegram-gh-action-dispatcher@v1
+      - uses: your-github-handle/telegram-gh-action-dispatcher@v1
         with:
           command: ${{ github.event.client_payload.command }}
           chat_id: ${{ github.event.client_payload.chat_id }}
@@ -109,7 +108,7 @@ Each project that wants Telegram command handling needs its own Worker deploymen
 
 ```bash
 # 1. Clone this repo
-git clone https://github.com/01max/telegram-gh-action-dispatcher.git
+git clone https://github.com/your-github-handle/telegram-gh-action-dispatcher.git
 cd telegram-gh-action-dispatcher
 
 # 2. Install dependencies
@@ -117,7 +116,7 @@ cd worker && npm install
 
 # 3. Edit wrangler.toml — set your vars
 #    ALLOWED_CHAT_IDS: comma-separated, e.g. "7457792489"
-#    GITHUB_REPO: e.g. "01max/my-project"
+#    GITHUB_REPO: e.g. "your-github-handle/my-project"
 
 # 4. Set secrets
 npx wrangler secret put TELEGRAM_BOT_TOKEN
