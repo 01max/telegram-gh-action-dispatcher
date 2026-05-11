@@ -1,4 +1,4 @@
-import { TelegramUpdate } from './types';
+import { TelegramUpdate, ProjectConfig } from './types';
 
 export function validateSecretToken(
   request: Request,
@@ -8,18 +8,11 @@ export function validateSecretToken(
   return token === webhookSecret;
 }
 
-export function isAllowedChat(
-  update: TelegramUpdate,
-  allowedChatIds: string
-): boolean {
-  const chatId = update.message?.chat?.id;
-  if (!chatId) return false;
-
-  const allowed = allowedChatIds
-    .split(',')
-    .map((s) => s.trim())
-    .map(Number);
-  return allowed.includes(chatId);
+export function lookupProject(
+  chatId: number,
+  projects: ProjectConfig[]
+): ProjectConfig | null {
+  return projects.find(p => p.chat_ids.includes(chatId)) ?? null;
 }
 
 export function parseCommand(

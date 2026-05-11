@@ -20,10 +20,14 @@ export interface TelegramUpdate {
   };
 }
 
+export interface ProjectConfig {
+  repo: string;
+  chat_ids: number[];
+}
+
 export interface Env {
   TELEGRAM_BOT_TOKEN: string;
   GITHUB_TOKEN: string;
-  GITHUB_REPO: string;
-  ALLOWED_CHAT_IDS: string;
   WEBHOOK_SECRET: string;
+  DISPATCHER_KV: KVNamespace;
 }

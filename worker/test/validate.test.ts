@@ -1,6 +1,11 @@
 import { describe, it, expect } from 'vitest';
-import { isAllowedChat, parseCommand } from '../src/validate';
-import { TelegramUpdate } from '../src/types';
+import { lookupProject, parseCommand } from '../src/validate';
+import { ProjectConfig, TelegramUpdate } from '../src/types';
+
+const sampleProjects: ProjectConfig[] = [
+  { repo: '01max/doctowatch', chat_ids: [123, 456] },
+  { repo: '01max/other', chat_ids: [789] },
+];
 
 function makeUpdate(overrides: Partial<TelegramUpdate>): TelegramUpdate {
   return {
@@ -9,43 +14,21 @@ function makeUpdate(overrides: Partial<TelegramUpdate>): TelegramUpdate {
   };
 }
 
-describe('isAllowedChat', () => {
-  it('allows a chat in the list', () => {
-    const update = makeUpdate({
-      message: {
-        message_id: 1,
-        chat: { id: 123, type: 'private' },
-        text: '/test',
-      },
-    });
-    expect(isAllowedChat(update, '123')).toBe(true);
+describe('lookupProject', () => {
+  it('finds project by chat ID', () => {
+    expect(lookupProject(123, sampleProjects)).toEqual(sampleProjects[0]);
   });
 
-  it('rejects a chat not in the list', () => {
-    const update = makeUpdate({
-      message: {
-        message_id: 1,
-        chat: { id: 456, type: 'private' },
-        text: '/test',
-      },
-    });
-    expect(isAllowedChat(update, '123')).toBe(false);
+  it('finds second project', () => {
+    expect(lookupProject(789, sampleProjects)).toEqual(sampleProjects[1]);
   });
 
-  it('handles comma-separated list with spaces', () => {
-    const update = makeUpdate({
-      message: {
-        message_id: 1,
-        chat: { id: 789, type: 'private' },
-        text: '/test',
-      },
-    });
-    expect(isAllowedChat(update, '123, 456, 789')).toBe(true);
+  it('returns null for unknown chat', () => {
+    expect(lookupProject(999, sampleProjects)).toBeNull();
   });
 
-  it('rejects if no message', () => {
-    const update = makeUpdate({});
-    expect(isAllowedChat(update, '123')).toBe(false);
+  it('returns null for empty config', () => {
+    expect(lookupProject(123, [])).toBeNull();
   });
 });
 

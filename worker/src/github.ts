@@ -1,20 +1,19 @@
-import { Env } from './types';
-
 export async function dispatchCommand(
-  env: Env,
+  repo: string,
+  token: string,
   command: string,
   chatId: number,
   args: string,
   messageId: number
 ): Promise<boolean> {
-  const [owner, repo] = env.GITHUB_REPO.split('/');
+  const [owner, repoName] = repo.split('/');
 
   const response = await fetch(
-    `https://api.github.com/repos/${owner}/${repo}/dispatches`,
+    `https://api.github.com/repos/${owner}/${repoName}/dispatches`,
     {
       method: 'POST',
       headers: {
-        Authorization: `Bearer ${env.GITHUB_TOKEN}`,
+        Authorization: `Bearer ${token}`,
         'Content-Type': 'application/json',
         'User-Agent': 'telegram-gh-action-dispatcher',
       },
