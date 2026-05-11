@@ -27,5 +27,6 @@ echo "Seeding KV namespace $KV_ID with $CONFIG_FILE ..."
 npx wrangler kv key put \
   --namespace-id "$KV_ID" \
   "projects" \
-  --path "$CONFIG_FILE"
+  --path "$CONFIG_FILE" \
+  --remote
 echo "Done."
