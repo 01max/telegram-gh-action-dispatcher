@@ -24,7 +24,7 @@ if [ ! -f "$CONFIG_FILE" ]; then
 fi
 
 echo "Seeding KV namespace $KV_ID with $CONFIG_FILE ..."
-npx wrangler kv:key put \
+npx wrangler kv key put \
   --namespace-id "$KV_ID" \
   "projects" \
   --path "$CONFIG_FILE"

@@ -118,7 +118,7 @@ cd worker && npm install && cd ..
 cp worker/wrangler.toml.example worker/wrangler.toml
 
 # 4. Create a KV namespace
-npx wrangler kv:namespace create dispatcher_kv
+npx wrangler kv namespace create dispatcher_kv
 #   → Copy the namespace ID from the output and paste it into worker/wrangler.toml
 #     under id = "..."
 
@@ -206,7 +206,7 @@ v1 used env vars `GITHUB_REPO` and `ALLOWED_CHAT_IDS` for single-project routing
 
 1. **Create a KV namespace:**
    ```bash
-   npx wrangler kv:namespace create dispatcher_kv
+   npx wrangler kv namespace create dispatcher_kv
    ```
    Note the namespace ID in the output.
 
