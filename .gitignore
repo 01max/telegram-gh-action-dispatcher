@@ -170,3 +170,4 @@ Temporary Items
 .tmp/
 *.local.toml
 worker/wrangler.toml
+projects.json

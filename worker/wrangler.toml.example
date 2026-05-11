@@ -2,9 +2,9 @@ name = "telegram-gh-action-dispatcher"
 main = "src/index.ts"
 compatibility_date = "2024-05-01"
 
-[vars]
-ALLOWED_CHAT_IDS = "7457792489"
-GITHUB_REPO = "01max/doctowatch"
+[[kv_namespaces]]
+binding = "DISPATCHER_KV"
+id = "YOUR_KV_NAMESPACE_ID"
 
 # Secrets (set via `wrangler secret put`):
 #   TELEGRAM_BOT_TOKEN
