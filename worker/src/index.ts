@@ -1,5 +1,5 @@
 import { TelegramUpdate, Env, ProjectConfig } from './types';
-import { validateSecretToken, resolveProjectBySecretToken, parseCommand } from './validate';
+import { resolveProjectBySecretToken, parseCommand } from './validate';
 import { sendMessage, setWebhook } from './telegram';
 import { dispatchCommand } from './github';
 
