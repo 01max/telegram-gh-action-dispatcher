@@ -1,5 +1,6 @@
 import { TelegramUpdate, ProjectConfig } from './types';
 
+/** Match a project by the X-Telegram-Bot-Api-Secret-Token header. */
 export function resolveProjectBySecretToken(
   request: Request,
   projects: ProjectConfig[]
@@ -9,6 +10,10 @@ export function resolveProjectBySecretToken(
   return projects.find(p => p.webhook_secret === token) ?? null;
 }
 
+/**
+ * Extract the first bot command and its arguments from a Telegram update.
+ * Returns the lowercased command name (with @bot suffix stripped) plus args text.
+ */
 export function parseCommand(
   update: TelegramUpdate
 ): { name: string; args: string } | null {

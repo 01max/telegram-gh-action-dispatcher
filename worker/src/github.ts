@@ -4,6 +4,11 @@ function shouldRetry(status: number): boolean {
   return status >= 500 || status === 429;
 }
 
+/**
+ * Trigger a repository_dispatch event on the target GitHub repo.
+ * Retries up to 3 times with exponential backoff on 5xx / 429 / network errors.
+ * Returns true if the dispatch was accepted (HTTP 2xx).
+ */
 export async function dispatchCommand(
   repo: string,
   token: string,

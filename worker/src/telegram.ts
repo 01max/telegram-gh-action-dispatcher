@@ -1,3 +1,4 @@
+/** Register a Telegram bot webhook for the given URL with a secret token. */
 export async function setWebhook(
   botToken: string,
   url: string,
@@ -18,6 +19,7 @@ export async function setWebhook(
   return response.json();
 }
 
+/** Send a Markdown message via a Telegram bot. Returns true on HTTP success. */
 export async function sendMessage(
   botToken: string,
   chatId: number | string,
