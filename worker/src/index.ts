@@ -1,5 +1,5 @@
 import { TelegramUpdate, Env, ProjectConfig } from './types';
-import { validateSecretToken, parseCommand, lookupProject } from './validate';
+import { validateSecretToken, resolveProjectBySecretToken, parseCommand } from './validate';
 import { sendMessage, setWebhook } from './telegram';
 import { dispatchCommand } from './github';
 
@@ -48,7 +48,9 @@ async function handleWebhook(
   env: Env,
   ctx: ExecutionContext
 ): Promise<Response> {
-  if (!validateSecretToken(request, env.WEBHOOK_SECRET)) {
+  const config = await loadConfig(env);
+  const project = resolveProjectBySecretToken(request, config);
+  if (!project) {
     return new Response('Unauthorized', { status: 401 });
   }
 
@@ -59,9 +61,7 @@ async function handleWebhook(
     return new Response('OK', { status: 200 });
   }
 
-  const config = await loadConfig(env);
-  const project = lookupProject(chatId, config);
-  if (!project) {
+  if (!project.chat_ids.includes(chatId)) {
     return new Response('OK', { status: 200 });
   }
 
@@ -120,7 +120,7 @@ async function handleRegisterAll(
       const result = await setWebhook(
         project.bot_token,
         webhookUrl,
-        env.WEBHOOK_SECRET
+        project.webhook_secret
       );
       return { repo: project.repo, ...result };
     })

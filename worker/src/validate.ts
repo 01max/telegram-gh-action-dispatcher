@@ -8,6 +8,15 @@ export function validateSecretToken(
   return token === webhookSecret;
 }
 
+export function resolveProjectBySecretToken(
+  request: Request,
+  projects: ProjectConfig[]
+): ProjectConfig | null {
+  const token = request.headers.get('X-Telegram-Bot-Api-Secret-Token');
+  if (!token) return null;
+  return projects.find(p => p.webhook_secret === token) ?? null;
+}
+
 export function lookupProject(
   chatId: number,
   projects: ProjectConfig[]

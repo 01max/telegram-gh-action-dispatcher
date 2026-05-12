@@ -24,6 +24,7 @@ export interface ProjectConfig {
   repo: string;
   chat_ids: number[];
   bot_token: string;
+  webhook_secret: string;
 }
 
 export interface Env {
