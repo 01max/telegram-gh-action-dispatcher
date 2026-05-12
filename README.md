@@ -124,14 +124,13 @@ npx wrangler kv namespace create dispatcher_kv
 
 # 5. Create projects.json with your repo/chat mappings
 cp projects.example.json projects.json
-#   → Edit projects.json — list each repo and its authorized chat IDs
+#   → Edit projects.json (list each repo and its authorized chat IDs)
 
 # 6. Seed the KV namespace
 ./scripts/seed-kv.sh <your-kv-namespace-id>
 
 # 7. Set secrets
 cd worker
-npx wrangler secret put TELEGRAM_BOT_TOKEN
 npx wrangler secret put GITHUB_TOKEN
 npx wrangler secret put WEBHOOK_SECRET
 
@@ -139,15 +138,16 @@ npx wrangler secret put WEBHOOK_SECRET
 npx wrangler deploy
 ```
 
-### Register the webhook (one-time)
+### Register webhooks (one-time)
 
-After deploying, register the worker URL as your Telegram bot's webhook:
+After deploying, register the worker URL for each bot in your `projects.json`:
 
 ```bash
-./scripts/register-webhook.sh https://your-worker.username.workers.dev <WEBHOOK_SECRET>
+curl -X POST https://your-worker.username.workers.dev/register-all \
+  -H "X-Setup-Token: <WEBHOOK_SECRET>"
 ```
 
-This calls the worker's `/register` endpoint, which calls Telegram's `setWebhook` API. After this, your bot will stop accepting `getUpdates` polling and start sending webhooks to the worker.
+This iterates all projects from KV and calls Telegram's `setWebhook` for each bot token. After this, your bots will stop accepting `getUpdates` polling and start sending webhooks to the worker.
 
 ---
 
@@ -159,9 +159,14 @@ Called by Telegram when a user sends a message. Expects a `X-Telegram-Bot-Api-Se
 
 If the message contains a bot command from a chat that maps to a configured project (via KV), the worker dispatches a `repository_dispatch` event to that repo and responds with `200 OK`.
 
-### `POST /register`
+### `POST /register-all`
 
-Admin endpoint for registering the webhook with Telegram. Expects a `X-Setup-Token` header matching `WEBHOOK_SECRET`. Calls `setWebhook` on the Telegram API and returns the result.
+Registers the webhook for every project configured in KV. Expects a `X-Setup-Token` header matching `WEBHOOK_SECRET`. Calls `setWebhook` for each bot token with the worker URL and returns a JSON array of results.
+
+```bash
+curl -X POST https://your-worker.username.workers.dev/register-all \
+  -H "X-Setup-Token: <WEBHOOK_SECRET>"
+```
 
 ### `POST /flush`
 
@@ -186,47 +191,25 @@ cp worker/wrangler.toml.example worker/wrangler.toml
 
 | Binding | Type | Description |
 |---------|------|-------------|
-| `DISPATCHER_KV` | KV namespace | Stores the project routing config (key `"projects"`, JSON array of `{ repo, chat_ids }`) |
+| `DISPATCHER_KV` | KV namespace | Stores the project routing config (key `"projects"`, JSON array of `{ repo, chat_ids, bot_token }`) |
 
 ### Worker secrets (`wrangler secret put`)
 
 | Secret | Description |
 |--------|-------------|
-| `TELEGRAM_BOT_TOKEN` | Bot token from [@BotFather](https://t.me/BotFather) |
 | `GITHUB_TOKEN` | GitHub PAT with `repo` scope (needs access to every configured repo for `repository_dispatch`) |
 | `WEBHOOK_SECRET` | Random string used to verify incoming webhook requests and protect admin endpoints |
 
+Bot tokens are stored alongside each project in KV (the `bot_token` field in `projects.json`).
+
 ---
 
-## Upgrading from v1
+## Upgrading
 
-v1 used env vars `GITHUB_REPO` and `ALLOWED_CHAT_IDS` for single-project routing. v2 uses Cloudflare KV for multi-project routing.
+See [UPGRADING.md](UPGRADING.md) for migration guides:
 
-### Migration steps
-
-1. **Create a KV namespace:**
-   ```bash
-   npx wrangler kv namespace create dispatcher_kv
-   ```
-   Note the namespace ID in the output.
-
-2. **Create and seed `projects.json`:**
-   ```bash
-   cp projects.example.json projects.json
-   # Edit with your project/chat mappings
-   ./scripts/seed-kv.sh <your-kv-namespace-id>
-   ```
-
-3. **Update `wrangler.toml`:**
-   - Remove the `[vars]` section (drop `ALLOWED_CHAT_IDS`, `GITHUB_REPO`)
-   - Add the `[[kv_namespaces]]` block with your namespace ID
-
-4. **Redeploy:**
-   ```bash
-   npx wrangler deploy
-   ```
-
-No changes needed in consuming repos (doctowatch, etc.) — the `repository_dispatch` payload format is identical.
+- [v1 → v2](UPGRADING.md#v1--v2-env-vars--kv) env vars to KV
+- [v2 → v3](UPGRADING.md#v2--v3-single-bot-token--per-project-bot-tokens) global bot token to per-project tokens
 
 ---
 
