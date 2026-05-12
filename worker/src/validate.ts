@@ -7,7 +7,7 @@ export function resolveProjectBySecretToken(
 ): ProjectConfig | null {
   const token = request.headers.get('X-Telegram-Bot-Api-Secret-Token');
   if (!token) return null;
-  return projects.find(p => p.webhook_secret === token) ?? null;
+  return projects.find((p) => p.webhook_secret === token) ?? null;
 }
 
 /**

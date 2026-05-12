@@ -72,7 +72,16 @@ async function handleWebhook(
 
   const messageId = update.message!.message_id;
 
-  ctx.waitUntil(dispatchOrNotify(project, env, command.name, chatId, command.args, messageId));
+  ctx.waitUntil(
+    dispatchOrNotify(
+      project,
+      env,
+      command.name,
+      chatId,
+      command.args,
+      messageId
+    )
+  );
 
   return new Response('OK', { status: 200 });
 }
@@ -116,10 +125,13 @@ async function handleRegisterAll(
   const config = await loadConfig(env);
 
   if (config.length === 0) {
-    return new Response(JSON.stringify({ error: 'No projects configured in KV' }), {
-      status: 400,
-      headers: { 'Content-Type': 'application/json' },
-    });
+    return new Response(
+      JSON.stringify({ error: 'No projects configured in KV' }),
+      {
+        status: 400,
+        headers: { 'Content-Type': 'application/json' },
+      }
+    );
   }
 
   const results = await Promise.all(
@@ -141,10 +153,7 @@ async function handleRegisterAll(
   });
 }
 
-async function handleFlush(
-  request: Request,
-  env: Env
-): Promise<Response> {
+async function handleFlush(request: Request, env: Env): Promise<Response> {
   const auth = request.headers.get('X-Setup-Token');
   if (auth !== env.WEBHOOK_SECRET) {
     return new Response('Unauthorized', { status: 401 });

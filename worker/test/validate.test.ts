@@ -3,8 +3,18 @@ import { resolveProjectBySecretToken, parseCommand } from '../src/validate';
 import { ProjectConfig, TelegramUpdate } from '../src/types';
 
 const sampleProjects: ProjectConfig[] = [
-  { repo: '01max/doctowatch', chat_ids: [123, 456], bot_token: 'bot1:abc', webhook_secret: 'secret1' },
-  { repo: '01max/other', chat_ids: [789], bot_token: 'bot2:xyz', webhook_secret: 'secret2' },
+  {
+    repo: '01max/doctowatch',
+    chat_ids: [123, 456],
+    bot_token: 'bot1:abc',
+    webhook_secret: 'secret1',
+  },
+  {
+    repo: '01max/other',
+    chat_ids: [789],
+    bot_token: 'bot2:xyz',
+    webhook_secret: 'secret2',
+  },
 ];
 
 function makeUpdate(overrides: Partial<TelegramUpdate>): TelegramUpdate {
@@ -25,12 +35,16 @@ function makeRequest(secretToken: string | null): Request {
 describe('resolveProjectBySecretToken', () => {
   it('finds project by matching secret token', () => {
     const request = makeRequest('secret1');
-    expect(resolveProjectBySecretToken(request, sampleProjects)).toEqual(sampleProjects[0]);
+    expect(resolveProjectBySecretToken(request, sampleProjects)).toEqual(
+      sampleProjects[0]
+    );
   });
 
   it('finds second project by secret token', () => {
     const request = makeRequest('secret2');
-    expect(resolveProjectBySecretToken(request, sampleProjects)).toEqual(sampleProjects[1]);
+    expect(resolveProjectBySecretToken(request, sampleProjects)).toEqual(
+      sampleProjects[1]
+    );
   });
 
   it('returns null for unknown secret token', () => {
