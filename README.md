@@ -239,14 +239,3 @@ npm run dev        # Start local dev server
 npm run type-check # TypeScript check
 npm test           # Run tests
 ```
-
----
-
-## Versioning
-
-Tag releases with semver (`v1.0.0`, `v1.1.0`, etc.). Consumers pin to major versions (`@v1`).
-
-```bash
-git tag v1.0.0
-git push origin v1.0.0
-```
