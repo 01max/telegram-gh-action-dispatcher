@@ -51,7 +51,7 @@ async function handleWebhook(
   const config = await loadConfig(env);
   const project = resolveProjectBySecretToken(request, config);
   if (!project) {
-    return new Response('Unauthorized', { status: 401 });
+    return new Response('Invalid secret token', { status: 401 });
   }
 
   const update: TelegramUpdate = await request.json();
