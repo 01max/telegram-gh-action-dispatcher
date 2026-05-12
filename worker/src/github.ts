@@ -6,6 +6,9 @@ export async function dispatchCommand(
   args: string,
   messageId: number
 ): Promise<boolean> {
+  if (!repo.includes('/')) {
+    throw new Error(`Invalid repo "${repo}": must be owner/repo`);
+  }
   const [owner, repoName] = repo.split('/');
 
   const response = await fetch(
