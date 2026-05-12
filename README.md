@@ -27,7 +27,7 @@ bin/handle_command <command> <chat_id> <args> <bot_token>
 | Arg | Description | Example |
 |-----|-------------|---------|
 | `command` | Detected command name (from Telegram) | `disable` |
-| `chat_id` | Telegram chat ID that sent the command | `7457792489` |
+| `chat_id` | Telegram chat ID that sent the command | `1234567890` |
 | `args` | Everything after the command in the message | `check.yml` |
 | `bot_token` | Telegram bot token (for sending replies) | `12345:ABC...` |
 
@@ -82,7 +82,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: 01max/telegram-gh-action-dispatcher@v1
+      - uses: 01max/telegram-gh-action-dispatcher@v4
         with:
           command: ${{ github.event.client_payload.command }}
           chat_id: ${{ github.event.client_payload.chat_id }}
@@ -108,7 +108,7 @@ A single Worker handles Telegram commands for any number of GitHub repos. Routin
 
 ```bash
 # 1. Clone this repo
-git clone https://github.com/01max/telegram-gh-action-dispatcher.git
+git clone https://github.com/your-username/telegram-gh-action-dispatcher.git
 cd telegram-gh-action-dispatcher
 
 # 2. Install dependencies
@@ -155,9 +155,9 @@ This iterates all projects from KV and calls Telegram's `setWebhook` for each bo
 
 ### `POST /webhook`
 
-Called by Telegram when a user sends a message. Expects a `X-Telegram-Bot-Api-Secret-Token` header matching `WEBHOOK_SECRET`.
+Called by Telegram when a user sends a message. The `X-Telegram-Bot-Api-Secret-Token` header is matched against each project's `webhook_secret` in KV to determine which repo should receive the dispatch.
 
-If the message contains a bot command from a chat that maps to a configured project (via KV), the worker dispatches a `repository_dispatch` event to that repo and responds with `200 OK`.
+If the message contains a bot command from a chat that maps to the resolved project, the worker dispatches a `repository_dispatch` event to that repo and responds with `200 OK`.
 
 ### `POST /register-all`
 
@@ -191,16 +191,16 @@ cp worker/wrangler.toml.example worker/wrangler.toml
 
 | Binding | Type | Description |
 |---------|------|-------------|
-| `DISPATCHER_KV` | KV namespace | Stores the project routing config (key `"projects"`, JSON array of `{ repo, chat_ids, bot_token }`) |
+| `DISPATCHER_KV` | KV namespace | Stores the project routing config (key `"projects"`, JSON array of `{ repo, chat_ids, bot_token, webhook_secret }`) |
 
 ### Worker secrets (`wrangler secret put`)
 
 | Secret | Description |
 |--------|-------------|
 | `GITHUB_TOKEN` | GitHub PAT with `repo` scope (needs access to every configured repo for `repository_dispatch`) |
-| `WEBHOOK_SECRET` | Random string used to verify incoming webhook requests and protect admin endpoints |
+| `WEBHOOK_SECRET` | Random string used to protect admin endpoints (`/flush`, `/register-all`) |
 
-Bot tokens are stored alongside each project in KV (the `bot_token` field in `projects.json`).
+Bot tokens and per-bot webhook secrets are stored alongside each project in KV (`bot_token` and `webhook_secret` fields in `projects.json`). The `X-Telegram-Bot-Api-Secret-Token` header on incoming webhooks is matched against each project's `webhook_secret` to identify which bot received the message.
 
 ---
 

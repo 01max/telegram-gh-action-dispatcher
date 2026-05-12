@@ -50,9 +50,9 @@ v2 used a single `TELEGRAM_BOT_TOKEN` wrangler secret shared across all projects
    ```json
    [
      {
-       "repo": "01max/doctowatch",
-       "chat_ids": [7457792489],
-       "bot_token": "8476020222:ABC..."
+       "repo": "your-username/your-repo",
+       "chat_ids": [1234567890],
+       "bot_token": "YOUR_BOT_TOKEN"
      }
    ]
    ```
@@ -78,5 +78,60 @@ v2 used a single `TELEGRAM_BOT_TOKEN` wrangler secret shared across all projects
    curl -X POST https://your-worker.workers.dev/register-all \
      -H "X-Setup-Token: <WEBHOOK_SECRET>"
    ```
+
+No changes needed in consuming repos. The `bin/handle_command` contract and `repository_dispatch` payload are identical.
+
+---
+
+## v3 → v4 (shared webhook secret → per-project webhook secrets)
+
+v3 used a single `WEBHOOK_SECRET` wrangler secret verified against incoming webhooks. v4 moves the webhook secret into each project's entry in KV, so each bot token gets its own secret. This allows the worker to distinguish which bot received a message when multiple bots share the same chat (e.g., a user DMs two different bots but their `chat.id` is the same).
+
+### What changed
+
+- `webhook_secret` added to `projects.json` — each project has its own secret
+- `/webhook` no longer uses the shared `WEBHOOK_SECRET`; instead, the incoming `X-Telegram-Bot-Api-Secret-Token` header is matched against each project's stored secret
+- `/register-all` now registers each bot with its own `webhook_secret` (instead of the shared one)
+- The shared `WEBHOOK_SECRET` wrangler secret is kept — still used for `/flush` and `/register-all` admin endpoints
+
+### Migration steps
+
+1. **Update `projects.json`** — add a unique `webhook_secret` to each project entry:
+
+   ```json
+   [
+     {
+       "repo": "your-username/your-repo",
+       "chat_ids": [1234567890],
+       "bot_token": "YOUR_BOT_TOKEN",
+       "webhook_secret": "YOUR_WEBHOOK_SECRET"
+     },
+     {
+       "repo": "your-username/your-other-repo",
+       "chat_ids": [1234567890],
+       "bot_token": "YOUR_OTHER_BOT_TOKEN",
+       "webhook_secret": "YOUR_OTHER_WEBHOOK_SECRET"
+     }
+   ]
+   ```
+
+   Each project needs a **different** secret. Generate via `openssl rand -hex 16`.
+
+2. **Re-seed KV:**
+   ```bash
+   ./scripts/seed-kv.sh <your-kv-namespace-id>
+   ```
+
+3. **Redeploy:**
+   ```bash
+   cd worker && npx wrangler deploy
+   ```
+
+4. **Re-register webhooks:**
+   ```bash
+   curl -X POST https://your-worker.workers.dev/register-all \
+     -H "X-Setup-Token: <WEBHOOK_SECRET>"
+   ```
+   The worker now registers each bot's webhook with its unique secret token, so Telegram sends the correct `X-Telegram-Bot-Api-Secret-Token` header per bot.
 
 No changes needed in consuming repos. The `bin/handle_command` contract and `repository_dispatch` payload are identical.
