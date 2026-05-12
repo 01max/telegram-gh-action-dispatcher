@@ -72,27 +72,34 @@ async function handleWebhook(
 
   const messageId = update.message!.message_id;
 
-  ctx.waitUntil(
-    (async () => {
-      const ok = await dispatchCommand(
-        project.repo,
-        env.GITHUB_TOKEN,
-        command.name,
-        chatId,
-        command.args,
-        messageId
-      );
-      if (!ok) {
-        await sendMessage(
-          project.bot_token,
-          chatId,
-          `Failed to dispatch command \`${command.name}\`.`
-        );
-      }
-    })()
-  );
+  ctx.waitUntil(dispatchOrNotify(project, env, command.name, chatId, command.args, messageId));
 
   return new Response('OK', { status: 200 });
+}
+
+async function dispatchOrNotify(
+  project: ProjectConfig,
+  env: Env,
+  commandName: string,
+  chatId: number,
+  args: string,
+  messageId: number
+): Promise<void> {
+  const ok = await dispatchCommand(
+    project.repo,
+    env.GITHUB_TOKEN,
+    commandName,
+    chatId,
+    args,
+    messageId
+  );
+  if (!ok) {
+    await sendMessage(
+      project.bot_token,
+      chatId,
+      `Failed to dispatch command \`${commandName}\`.`
+    );
+  }
 }
 
 async function handleRegisterAll(
