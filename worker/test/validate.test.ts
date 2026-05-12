@@ -3,8 +3,8 @@ import { lookupProject, parseCommand } from '../src/validate';
 import { ProjectConfig, TelegramUpdate } from '../src/types';
 
 const sampleProjects: ProjectConfig[] = [
-  { repo: '01max/doctowatch', chat_ids: [123, 456] },
-  { repo: '01max/other', chat_ids: [789] },
+  { repo: '01max/doctowatch', chat_ids: [123, 456], bot_token: 'bot1:abc' },
+  { repo: '01max/other', chat_ids: [789], bot_token: 'bot2:xyz' },
 ];
 
 function makeUpdate(overrides: Partial<TelegramUpdate>): TelegramUpdate {

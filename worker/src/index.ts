@@ -31,8 +31,8 @@ export default {
       return handleWebhook(request, env, ctx);
     }
 
-    if (url.pathname === '/register' && request.method === 'POST') {
-      return handleRegister(request, env);
+    if (url.pathname === '/register-all' && request.method === 'POST') {
+      return handleRegisterAll(request, env);
     }
 
     if (url.pathname === '/flush' && request.method === 'POST') {
@@ -84,7 +84,7 @@ async function handleWebhook(
       );
       if (!ok) {
         await sendMessage(
-          env.TELEGRAM_BOT_TOKEN,
+          project.bot_token,
           chatId,
           `Failed to dispatch command \`${command.name}\`.`
         );
@@ -95,7 +95,7 @@ async function handleWebhook(
   return new Response('OK', { status: 200 });
 }
 
-async function handleRegister(
+async function handleRegisterAll(
   request: Request,
   env: Env
 ): Promise<Response> {
@@ -106,14 +106,30 @@ async function handleRegister(
 
   const url = new URL(request.url);
   const webhookUrl = `${url.protocol}//${url.hostname}/webhook`;
+  const config = await loadConfig(env);
 
-  const result = await setWebhook(
-    env.TELEGRAM_BOT_TOKEN,
-    webhookUrl,
-    env.WEBHOOK_SECRET
+  if (config.length === 0) {
+    return new Response(JSON.stringify({ error: 'No projects configured in KV' }), {
+      status: 400,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
+
+  const results = await Promise.all(
+    config.map(async (project) => {
+      const result = await setWebhook(
+        project.bot_token,
+        webhookUrl,
+        env.WEBHOOK_SECRET
+      );
+      return { repo: project.repo, ...result };
+    })
   );
 
-  return new Response(JSON.stringify(result), {
+  const allOk = results.every((r) => r.ok);
+
+  return new Response(JSON.stringify(results), {
+    status: allOk ? 200 : 207,
     headers: { 'Content-Type': 'application/json' },
   });
 }

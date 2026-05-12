@@ -7,6 +7,5 @@ binding = "DISPATCHER_KV"
 id = "YOUR_KV_NAMESPACE_ID"
 
 # Secrets (set via `wrangler secret put`):
-#   TELEGRAM_BOT_TOKEN
 #   GITHUB_TOKEN
 #   WEBHOOK_SECRET

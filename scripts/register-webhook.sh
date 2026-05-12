@@ -4,7 +4,8 @@ set -euo pipefail
 if [ $# -ne 2 ]; then
   echo "Usage: $0 <worker_url> <setup_token>"
   echo ""
-  echo "Registers the worker's /webhook endpoint as the Telegram webhook."
+  echo "Registers the webhook for every project configured in KV."
+  echo "Calls the worker's /register-all endpoint."
   echo ""
   echo "Arguments:"
   echo "  worker_url   The deployed worker URL (e.g. https://my-worker.username.workers.dev)"
@@ -18,8 +19,8 @@ fi
 WORKER_URL="${1%/}"
 SETUP_TOKEN="$2"
 
-echo "Registering webhook at ${WORKER_URL}/register ..."
+echo "Registering webhooks at ${WORKER_URL}/register-all ..."
 
-curl -s -X POST "${WORKER_URL}/register" \
+curl -s -X POST "${WORKER_URL}/register-all" \
   -H "X-Setup-Token: ${SETUP_TOKEN}" \
   -H "Content-Type: application/json" | jq .

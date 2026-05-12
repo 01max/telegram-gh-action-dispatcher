@@ -1,10 +1,12 @@
 [
   {
-    "repo": "anyone/a-project",
-    "chat_ids": [7457792489]
+    "repo": "01max/doctowatch",
+    "chat_ids": [7457792489],
+    "bot_token": "YOUR_BOT_TOKEN"
   },
   {
-    "repo": "someone/my-other-project",
-    "chat_ids": [1234567890]
+    "repo": "01max/my-other-project",
+    "chat_ids": [1234567890],
+    "bot_token": "YOUR_OTHER_BOT_TOKEN"
   }
 ]
