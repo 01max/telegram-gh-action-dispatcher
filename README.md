@@ -108,7 +108,7 @@ A single Worker handles Telegram commands for any number of GitHub repos. Routin
 
 ```bash
 # 1. Clone this repo
-git clone https://github.com/your-username/telegram-gh-action-dispatcher.git
+git clone https://github.com/01max/telegram-gh-action-dispatcher.git
 cd telegram-gh-action-dispatcher
 
 # 2. Install dependencies
@@ -135,7 +135,7 @@ npx wrangler secret put GITHUB_TOKEN
 npx wrangler secret put WEBHOOK_SECRET
 
 # 8. Deploy
-npx wrangler deploy
+npm run deploy
 ```
 
 ### Register webhooks (one-time)
@@ -218,7 +218,24 @@ See [UPGRADING.md](UPGRADING.md) for migration guides:
 ```bash
 cd worker
 npm install
-npm run dev        # Start local dev server
-npm run type-check # TypeScript check
-npm test           # Run tests
+npm run dev          # Start local dev server (wrangler dev)
+npm run type-check   # TypeScript check
+npm run lint         # ESLint
+npm run format       # Prettier auto-fix
+npm run format:check # Prettier check (CI)
+npm test             # Vitest
+npm run deploy       # Deploy to Cloudflare
 ```
+
+## Code quality & CI
+
+| Tool | What it covers | Enforced in CI |
+|------|---------------|----------------|
+| [EditorConfig](.editorconfig) | Line endings, charset, trimming | — (editor-side) |
+| [ESLint](worker/eslint.config.js) | TypeScript linting | `lint` job |
+| [Prettier](worker/prettier.config.js) | Code formatting | `format` job |
+| [ShellCheck](https://shellcheck.net) | `handler.sh`, `scripts/*.sh` | `shellcheck` job |
+
+CI runs on every push and PR to `main` with 5 parallel jobs: `type-check`, `lint`, `format`, `test`, `shellcheck`. All must pass before merging.
+
+Dependabot is configured (`.github/dependabot.yml`) to keep npm dev dependencies and GitHub Actions up to date weekly.
