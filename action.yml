@@ -1,8 +1,8 @@
-name: 'Telegram Command Handler'
-description: 'Routes a Telegram user command to the consumer project handler script'
+name: 'Telegram Webhook Command Handler'
+description: 'Routes a Telegram user command to the consumer project handler script via webhooks'
 branding:
-  icon: 'terminal'
-  color: 'blue'
+  icon: 'at-sign'
+  color: 'green'
 inputs:
   command:
     description: 'Command name (e.g. disable)'
